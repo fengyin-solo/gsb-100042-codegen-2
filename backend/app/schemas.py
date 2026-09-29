@@ -41,6 +41,40 @@ class ShipmentEntry(BaseModel):
     field_6: str | None = None  # 预计到达
     field_7: str | None = None  # 运单状态
 
+
+class ShipmentImportRowResult(BaseModel):
+    """暂存核对和确认导入共用的逐行结果。"""
+
+    row_number: int
+    status: str
+    waybill_no: str | None = None
+    sender: str | None = None
+    receiver: str | None = None
+    shipment_batch: str | None = None
+    message: str
+    original: dict[str, Any] = Field(default_factory=dict)
+    entry_id: int | None = None
+
+
+class ShipmentImportResult(BaseModel):
+    """发运单批量导入任务；确认成功后同时带出已重算的汇总与明细。"""
+
+    job_id: str
+    filename: str
+    staged_file: str
+    status: str
+    message: str
+    total: int
+    valid: int
+    conflicts: int
+    invalid: int
+    imported: int = 0
+    rows: list[ShipmentImportRowResult]
+    batch_summary: list[dict[str, Any]] = Field(default_factory=list)
+    entries: list[dict[str, Any]] = Field(default_factory=list)
+
+
+
 class TempMonitorEntry(BaseModel):
     """温度记录明细结构。"""
 

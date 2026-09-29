@@ -74,3 +74,10 @@ npm run dev
   `backend/app/routers/<模块>.py`，业务规则在 `backend/app/services/<模块>.py`。
 - 列表接口统一返回 `{ items, total, page, size }`，动作接口统一返回 `{ ok, message }`。
 - 状态流转只允许在 `app/services` 里改，路由层不做业务判断。
+
+## 发运单批量导入
+
+- `POST /api/shipment/imports`：上传 UTF-8 CSV，原文件先写入临时暂存目录，再逐行核对运单编号、发货方、收货方、发运批次。
+- `POST /api/shipment/imports/{job_id}/commit`：确认暂存结果；提交时在同一把数据锁内二次查重，冲突行保留原记录。
+- `GET /api/shipment/batch-summary`：按当前发运单实时重算发运批次汇总，列表与明细也在导入后重新读取。
+- 同一导入任务重复确认是幂等操作；并发确认同一运单时只有一个批次能够新增落库，不会重复生成运单。
