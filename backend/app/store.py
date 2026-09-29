@@ -14,6 +14,9 @@ class Store:
         self._tables: dict[str, list[dict[str, Any]]] = {
             name: [dict(row) for row in rows] for name, rows in SEED_ROWS.items()
         }
+        # 导入批次暂存区：批量导入先落在这里暂存，核对后再提交到业务表。
+        self._batches: list[dict[str, Any]] = []
+        self._batch_seq = 0
 
     def module_names(self) -> list[str]:
         return sorted(self._tables)
@@ -26,6 +29,22 @@ class Store:
             if int(row.get("id", 0)) == entry_id:
                 return row
         return None
+
+    def next_batch_seq(self) -> int:
+        self._batch_seq += 1
+        return self._batch_seq
+
+    def add_batch(self, batch: dict[str, Any]) -> None:
+        self._batches.append(batch)
+
+    def find_batch(self, batch_id: int) -> dict[str, Any] | None:
+        for batch in self._batches:
+            if int(batch.get("id", 0)) == batch_id:
+                return batch
+        return None
+
+    def list_batches(self) -> list[dict[str, Any]]:
+        return list(self._batches)
 
     def overview(self) -> dict[str, object]:
         modules: list[dict[str, object]] = []

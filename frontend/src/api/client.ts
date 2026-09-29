@@ -19,3 +19,14 @@ export async function fetchJson<T>(path: string): Promise<T> {
   }
   return (await response.json()) as T
 }
+
+/** 上传文件（multipart）：不手动设置 Content-Type，交给浏览器自带 boundary。 */
+export async function uploadFile<T>(path: string, file: File): Promise<T> {
+  const form = new FormData()
+  form.append('file', file)
+  const response = await fetch(path, { method: 'POST', body: form })
+  if (!response.ok) {
+    throw new Error(`接口返回 ${response.status}，文件未上传成功`)
+  }
+  return (await response.json()) as T
+}
